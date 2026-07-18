@@ -10,7 +10,7 @@ namespace GymManagement.DAL.Data.Models
     {
         // public DateTime joindate { get; set; } we have created at
 
-        public string? Photo { get; set; } = default!;
+        public string Photo { get; set; } = default!;
 
         public HealthRecord HealthRecord { get; set; } = default!;
 

@@ -47,6 +47,7 @@ namespace GymManagement.BLL.Services.Classes
             }
             return Result<IEnumerable<SessionViewModels>>.Ok(MappedSessions);
         }
+        
         #region Create Session
         public async Task<Result> CreateSessionAsync(CreateSessionViewModel model, CancellationToken ct)
         {

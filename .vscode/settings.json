@@ -1,0 +1,8 @@
+{
+    "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
+    "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution",
+    "csharp.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
+    "csharp.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution",
+    "omnisharp.analyzeOpenFilesOnly": false,
+    "omnisharp.enableRoslynAnalyzers": true
+}

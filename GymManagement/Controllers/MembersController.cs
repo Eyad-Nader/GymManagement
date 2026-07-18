@@ -1,15 +1,20 @@
 ﻿using GymManagement.BLL.Services.Interfaces;
 using GymManagement.BLL.ViewModels.MemberViewModels;
+using GymManagement.BLL.Attachment;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymManagement.pl.Controllers
 {
+    [Authorize(Roles ="SuperAdmin")]
     public class MembersController : Controller
     {
         private readonly IMemberService _memberService;
-        public MembersController(IMemberService memberService)
+        private readonly IAttachmentService _attachmentService;
+        public MembersController(IMemberService memberService , IAttachmentService attachmentService)
         {
             _memberService = memberService;
+            _attachmentService = attachmentService;
         }
 
         public async Task<IActionResult> Index(CancellationToken ct )
@@ -35,6 +40,18 @@ namespace GymManagement.pl.Controllers
                 TempData["ErrorMessage"] = "Failed to create member.";
                 
             return RedirectToAction(nameof(Index));         
+        }
+
+        public async Task<IActionResult> GetPhoto(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberByIdAsync(id, ct);
+            if (member == null || string.IsNullOrWhiteSpace(member.Photo))
+                return NotFound();
+            
+            var file = _attachmentService.GetFile("Members", member.Photo);
+            if(file is null) return NotFound();
+            
+            return File(file.Value.stream, file.Value.ContentType);
         }
 
         public async Task<IActionResult> MemberDetails(int id, CancellationToken ct)

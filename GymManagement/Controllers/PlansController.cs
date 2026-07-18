@@ -6,9 +6,11 @@ using GymManagement.DAL.Repositories.Classes;
 using GymManagement.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
-namespace GymManagement.Controllers
+namespace GymManagement.PL.Controllers
 {
+    [Authorize]
     public class PlansController : Controller
     {
 

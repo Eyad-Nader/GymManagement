@@ -1,10 +1,11 @@
 ﻿using GymManagement.DAL.Data.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 namespace GymManagement.DAL.Data.DbContexts
 {
-    public class GymDbContext : DbContext
+    public class GymDbContext : IdentityDbContext<ApplicationUser>
     {
 
         public GymDbContext(DbContextOptions<GymDbContext> options) : base(options)
@@ -13,7 +14,10 @@ namespace GymManagement.DAL.Data.DbContexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            
+            #region Change Seeding Data
             modelBuilder.Entity<Plan>().HasData(
             new Plan
             {
@@ -56,6 +60,7 @@ namespace GymManagement.DAL.Data.DbContexts
                 CreatedAt = new DateTime(2026, 1, 1)
             }
             );
+            #endregion
         }
 
         public DbSet<Plan> Plans { get; set; }
