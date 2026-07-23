@@ -1,4 +1,4 @@
-﻿@model CreateMemberViewModel
+@model CreateMemberViewModel
 @{
         ViewData["Title"] = "Create Member";
 }
@@ -9,7 +9,15 @@
         <header class="mb-4">
             <h3 class="text-primary-color">Add Member</h3>
         </header>
-        <form asp-controller="Members" asp-action="Create" method="post" enctype="multipart/form-data">
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div id="Alert" class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        <form id="createMemberForm" asp-controller="Members" asp-action="Create" method="post" enctype="multipart/form-data">
 
             <!-- Step navigation -->
             <ul class="nav nav-tabs mb-4" id="addMemberTabs" role="tablist">
@@ -182,24 +190,7 @@
 @section ValidationScripts 
 {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+    @await Html.PartialAsync("_ValidationSwitchToHealthRecordScriptsPartial")
+    @await Html.PartialAsync("PreviewPhotoBeforeUploadScriptsPartial")
+    @await Html.PartialAsync("_AlertBoxScript")
 }
-@*
-
-
-
-<script>
-    // Preview photo before upload
-    document.getElementById('photoInput').addEventListener('change', function (e) {
-        var file = e.target.files[0];
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                var preview = document.getElementById('photoPreview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            }
-            reader.readAsDataURL(file);
-        }
-    });
-</script>
-*@

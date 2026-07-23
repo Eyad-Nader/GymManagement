@@ -1,0 +1,67 @@
+<script>
+    // Preview photo before upload
+    document.getElementById('photoInput').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var preview = document.getElementById('photoPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+
+                // Save to sessionStorage to restore it if validation fails
+                try {
+                    sessionStorage.setItem('memberPhotoBase64', e.target.result);
+                    sessionStorage.setItem('memberPhotoName', file.name);
+                } catch (err) {
+                    console.error("Failed to save image to sessionStorage: ", err);
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Restore photo from sessionStorage if keepPhoto is true
+    document.addEventListener("DOMContentLoaded", function () {
+        const keepPhoto = @(ViewBag.KeepPhoto == true ? "true" : "false");
+        
+        if (!keepPhoto) {
+            sessionStorage.removeItem('memberPhotoBase64');
+            sessionStorage.removeItem('memberPhotoName');
+        } else {
+            const base64 = sessionStorage.getItem('memberPhotoBase64');
+            const name = sessionStorage.getItem('memberPhotoName');
+            
+            if (base64 && name) {
+                // Show preview
+                const preview = document.getElementById('photoPreview');
+                if (preview) {
+                    preview.src = base64;
+                    preview.style.display = 'block';
+                }
+
+                // Set file input files list programmatically
+                const fileInput = document.getElementById('photoInput');
+                if (fileInput) {
+                    try {
+                        const parts = base64.split(',');
+                        const mime = parts[0].match(/:(.*?);/)[1];
+                        const bstr = atob(parts[1]);
+                        let n = bstr.length;
+                        const u8arr = new Uint8Array(n);
+                        while (n--) {
+                            u8arr[n] = bstr.charCodeAt(n);
+                        }
+                        const file = new File([u8arr], name, { type: mime });
+                        
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        fileInput.files = dataTransfer.files;
+                    } catch (err) {
+                        console.error("Failed to restore photo: ", err);
+                    }
+                }
+            }
+        }
+    });
+</script>

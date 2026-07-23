@@ -11,5 +11,6 @@ namespace GymManagement.DAL.Repositories.Interfaces
     public interface IMemberShipsRepository : IGenaricRepository<MemberShip>
     {
         Task<IEnumerable<MemberShip>> GetAllMemberShipsWithMemberAndPlanAsync(CancellationToken ct = default);
+        Task<MemberShip?> GetActiveMembershipWithPlanAsync(int memberId, CancellationToken ct = default);
     }
 }

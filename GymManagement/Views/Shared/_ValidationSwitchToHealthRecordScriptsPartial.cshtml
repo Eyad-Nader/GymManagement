@@ -1,0 +1,38 @@
+<script>
+    function checkAndSwitchToHealthTab() {
+        let healthTab = document.getElementById("health-info");
+        if (healthTab) {
+            // Find all error messages or fields with validation errors in the health tab
+            let errors = healthTab.querySelectorAll(".text-danger:not(:empty), .field-validation-error, .input-validation-error");
+            let hasError = false;
+            for (let error of errors) {
+                if (error.tagName === 'SPAN' && error.textContent.trim() !== '') {
+                    hasError = true;
+                    break;
+                } else if (error.tagName !== 'SPAN') {
+                    hasError = true;
+                    break;
+                }
+            }
+            if (hasError) {
+                let tabButton = document.querySelector('#health-tab');
+                if (tabButton) {
+                    let tabTrigger = new bootstrap.Tab(tabButton);
+                    tabTrigger.show();
+                }
+            }
+        }
+    }
+
+    // 1. Run on page load to handle server-side validation errors
+    document.addEventListener("DOMContentLoaded", function () {
+        checkAndSwitchToHealthTab();
+    });
+
+    // 2. Run when validation fails client-side (jQuery validation)
+    $(document).ready(function () {
+        $("#createMemberForm").on("invalid-form.validate", function (event, validator) {
+            setTimeout(checkAndSwitchToHealthTab, 50);
+        });
+    });
+</script>

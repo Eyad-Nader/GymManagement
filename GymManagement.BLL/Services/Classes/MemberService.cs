@@ -40,7 +40,7 @@ namespace GymManagement.BLL.Services.Classes
             if (member == null) return Result<MemberViewModel?>.NotFound("Member not found");
 
             var detailsMemberViewModel = _mapper.Map<Member, MemberViewModel>(member);
-            var ActiveMemberShip = await _unitOfWork.GetRepository<MemberShip>().FirstOrDefaultAsync(m => m.MemberId == member.Id && m.EndDate > DateTime.Now, ct);
+            var ActiveMemberShip = await _unitOfWork.MemberShipsRepository.GetActiveMembershipWithPlanAsync(member.Id);
             if (ActiveMemberShip != null)
             {
                 detailsMemberViewModel.PlanName = ActiveMemberShip.Plan.Name;
@@ -128,9 +128,9 @@ namespace GymManagement.BLL.Services.Classes
             if (member == null) return Result.NotFound("Member not found");
 
             // buissnes logic                                              الحته ديه غلط عشان ميقدرش يوصل للشيسن لسه هنعدلها 
-            var ActiveSession = await _unitOfWork.GetRepository<Booking>().AnyAsync(b => b.MemberId == id && b.Session.StartTime > DateTime.Now, ct);
+            var ActiveSession = await _unitOfWork.MemberShipsRepository.GetActiveMembershipWithPlanAsync(member.Id);
 
-            if (ActiveSession) return Result.Fail("Member has active session");
+            if (ActiveSession.IsActive) return Result.Fail("Member has active session");
 
             var attachment = member.Photo;
             _unitOfWork.GetRepository<Member>().Delete(member);

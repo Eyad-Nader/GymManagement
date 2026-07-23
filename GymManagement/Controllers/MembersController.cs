@@ -1,4 +1,4 @@
-﻿using GymManagement.BLL.Services.Interfaces;
+using GymManagement.BLL.Services.Interfaces;
 using GymManagement.BLL.ViewModels.MemberViewModels;
 using GymManagement.BLL.Attachment;
 using Microsoft.AspNetCore.Mvc;
@@ -31,15 +31,21 @@ namespace GymManagement.pl.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.KeepPhoto = true;
                 return View(nameof(Create), model);
             }
             var result = await _memberService.CreateMemberAsync(model, ct);
             if (result.Success)          
+            {
                 TempData["SuccessMessage"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
             else
+            {
                 TempData["ErrorMessage"] = result.Message;
-                
-            return RedirectToAction(nameof(Index));         
+                ViewBag.KeepPhoto = true;
+                return View(nameof(Create), model);
+            }
         }
 
         public async Task<IActionResult> GetPhoto(int id, CancellationToken ct)
