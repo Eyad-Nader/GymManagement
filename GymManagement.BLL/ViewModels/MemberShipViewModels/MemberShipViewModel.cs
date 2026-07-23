@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GymManagement.BLL.ViewModels.MemberShipViewModels
+{
+    public class MemberShipViewModel
+    {
+        public int MemberId { get; set; }
+        public string MemberName { get; set; } = default!;
+        public string PlanName { get; set; } = default!;
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Status  => EndDate > DateTime.Now  ? "Active" : "Expired";
+
+        public bool IsActive => EndDate > DateTime.Now;
+
+    }
+}

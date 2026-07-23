@@ -10,7 +10,7 @@ using GymManagement.DAL.Repositories.Classes;
 using GymManagement.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-
+using GymManagement.DAL.Repositories.Classes;
 namespace GymManagement
 {
     public class Program
@@ -29,7 +29,9 @@ namespace GymManagement
             builder.Services.AddScoped<ISessionService, SessionService>();
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+            builder.Services.AddScoped<IMemberShipService, MemberShipService>();
 
+            builder.Services.AddScoped<IMemberShipsRepository, MemberShipsRepository>();
             builder.Services.AddScoped<ISessionRepository, SessionRepository>();
             builder.Services.AddScoped(typeof(IGenaricRepository<>), typeof(GenaricRepository<>));
 

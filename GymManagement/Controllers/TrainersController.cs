@@ -17,17 +17,18 @@ namespace GymManagement.pl.Controllers
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             var trainers = await _trainerService.GetAllTrainersAsync(ct);
-            return View(trainers);
+            return View(trainers.Value);
         }
 
         public async Task<IActionResult> Details(int id, CancellationToken ct)
         {
             var trainer = await _trainerService.GetTrainerByIdAsync(id, ct);
-            if (trainer == null) { 
-                TempData["ErrorMessage"] = $"No member found With ID: {id}";
+            if (!trainer.Success)
+            {
+                TempData["ErrorMessage"] = trainer.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(trainer);
+            return View(trainer.Value);
 
         }
 
@@ -42,10 +43,10 @@ namespace GymManagement.pl.Controllers
                 return View(nameof(Create), model);
             }
             var result = await _trainerService.CreateTrainerAsync(model, ct);
-            if (result)
+            if (result.Success)
                 TempData["SuccessMessage"] = "Trainer created successfully.";
             else
-                TempData["ErrorMessage"] = "Failed to create trainer.";
+                TempData["ErrorMessage"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
 
@@ -53,12 +54,12 @@ namespace GymManagement.pl.Controllers
         public async Task<IActionResult> Edit(int id, CancellationToken ct)
         {
             var trainer = await _trainerService.GetTrainerForUpdateAsync(id, ct);
-            if (trainer == null)
+            if (!trainer.Success)
             {
-                TempData["ErrorMessage"] = $"No member found With ID: {id}";
+                TempData["ErrorMessage"] = trainer.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(trainer);
+            return View(trainer.Value);
         }
         [HttpPost]
         public async Task<IActionResult> Edit([FromRoute] int id, UpdatedTrainerViewModel model, CancellationToken ct)
@@ -68,10 +69,10 @@ namespace GymManagement.pl.Controllers
                 return View(nameof(Edit), model);
             }
             var result = await _trainerService.UpdateTrainerAsync(id, model, ct);
-            if (result)
+            if (result.Success)
                 TempData["SuccessMessage"] = "Trainer updated successfully.";
             else
-                TempData["ErrorMessage"] = "Failed to update trainer.";
+                TempData["ErrorMessage"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
 
@@ -79,12 +80,12 @@ namespace GymManagement.pl.Controllers
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
             var trainer = await _trainerService.GetTrainerByIdAsync(id, ct);
-            if (trainer == null)
+            if (!trainer.Success)
             {
-                TempData["ErrorMessage"] = $"No member found With ID: {id}";
+                TempData["ErrorMessage"] = trainer.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(trainer);
+            return View(trainer.Value);
         }
 
 
@@ -93,10 +94,10 @@ namespace GymManagement.pl.Controllers
         public async Task<IActionResult> DeleteConfirmed([FromRoute] int id, CancellationToken ct)
         {
             var result = await _trainerService.DeleteTrainerAsync(id, ct);  
-            if (result)
+            if (result.Success)
                 TempData["SuccessMessage"] = "Trainer deleted successfully.";
             else
-                TempData["ErrorMessage"] = "Failed to delete trainer.";
+                TempData["ErrorMessage"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
     }

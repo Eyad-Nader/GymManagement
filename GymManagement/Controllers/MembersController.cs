@@ -20,7 +20,7 @@ namespace GymManagement.pl.Controllers
         public async Task<IActionResult> Index(CancellationToken ct )
         {
             var members = await _memberService.GetAllMembersAsync(ct);
-            return View(members);
+            return View(members.Value);
         }
 
         [HttpGet]
@@ -34,10 +34,10 @@ namespace GymManagement.pl.Controllers
                 return View(nameof(Create), model);
             }
             var result = await _memberService.CreateMemberAsync(model, ct);
-            if (result)          
-                TempData["SuccessMessage"] = "Member created successfully.";
+            if (result.Success)          
+                TempData["SuccessMessage"] = result.Message;
             else
-                TempData["ErrorMessage"] = "Failed to create member.";
+                TempData["ErrorMessage"] = result.Message;
                 
             return RedirectToAction(nameof(Index));         
         }
@@ -45,10 +45,10 @@ namespace GymManagement.pl.Controllers
         public async Task<IActionResult> GetPhoto(int id, CancellationToken ct)
         {
             var member = await _memberService.GetMemberByIdAsync(id, ct);
-            if (member == null || string.IsNullOrWhiteSpace(member.Photo))
+            if (!member.Success || string.IsNullOrWhiteSpace(member.Value.Photo))
                 return NotFound();
             
-            var file = _attachmentService.GetFile("Members", member.Photo);
+            var file = _attachmentService.GetFile("Members", member.Value.Photo);
             if(file is null) return NotFound();
             
             return File(file.Value.stream, file.Value.ContentType);
@@ -57,35 +57,35 @@ namespace GymManagement.pl.Controllers
         public async Task<IActionResult> MemberDetails(int id, CancellationToken ct)
         {
             var member = await _memberService.GetMemberByIdAsync(id, ct);
-            if (member == null)
+            if (!member.Success || member.Value == null)
             {
-                TempData["ErrorMessage"] = $"No member found With ID: {id}";
+                TempData["ErrorMessage"] = member.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(member);
+            return View(member.Value);
         }
         
         public async Task<IActionResult> HealthRecordDetails(int id, CancellationToken ct)
         {
             var memberHealthRecord = await _memberService.GetHealthRecordByIdAsync(id, ct);
-            if (memberHealthRecord == null)
+            if (!memberHealthRecord.Success || memberHealthRecord.Value == null)
             {
-                TempData["ErrorMessage"] = $"No member HealthRecord found With ID: {id}";
+                TempData["ErrorMessage"] = memberHealthRecord.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(memberHealthRecord);
+            return View(memberHealthRecord.Value);
         }
 
         [HttpGet]
         public async Task<IActionResult> EditMember(int id, CancellationToken ct)
         {
             var memberEditViewModel = await _memberService.GetMemberEditedByIdAsync(id, ct);
-            if (memberEditViewModel == null)
+            if (!memberEditViewModel.Success || memberEditViewModel.Value == null)
             {
-                TempData["ErrorMessage"] = $"No member found With ID: {id}";
+                TempData["ErrorMessage"] = memberEditViewModel.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(memberEditViewModel);
+            return View(memberEditViewModel.Value);
         }
 
 
@@ -97,10 +97,10 @@ namespace GymManagement.pl.Controllers
                 return View(nameof(EditMember), model);
             }
             var result = await _memberService.UpdateMemberAsync(id, model, ct);
-            if(result)
+            if(result.Success)
                 TempData["SuccessMessage"] = "Member updated successfully.";
             else
-                TempData["ErrorMessage"] = "Failed to update member.";
+                TempData["ErrorMessage"] = result.Message;
 
             return RedirectToAction(nameof(Index));
         }
@@ -108,12 +108,12 @@ namespace GymManagement.pl.Controllers
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
             var member = await _memberService.GetMemberByIdAsync(id, ct);
-            if (member == null)
+            if (!member.Success || member.Value == null)
             {
-                TempData["ErrorMessage"] = $"No member found With ID: {id}";
+                TempData["ErrorMessage"] = member.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View();
+            return View(member.Value);
         }
 
 
@@ -121,7 +121,7 @@ namespace GymManagement.pl.Controllers
         public async Task<IActionResult> DeleteConfirmed([FromRoute]int id, CancellationToken ct)
         {
             var result = await _memberService.DeleteMemberAsync(id, ct);
-            if (result)
+            if (result.Success)
                 TempData["SuccessMessage"] = "Member deleted successfully.";
             else
                 TempData["ErrorMessage"] = "Failed to delete member.";

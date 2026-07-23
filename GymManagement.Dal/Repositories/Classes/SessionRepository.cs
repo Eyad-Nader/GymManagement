@@ -12,6 +12,7 @@ namespace GymManagement.DAL.Repositories.Classes
 {
     public class SessionRepository : GenaricRepository<Session> ,ISessionRepository
     {
+
         private readonly GymDbContext _dbContext;
         public SessionRepository(GymDbContext dbContext) : base(dbContext)    
         {

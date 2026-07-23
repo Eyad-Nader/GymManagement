@@ -1,7 +1,9 @@
-﻿using GymManagement.BLL.Services.Interfaces;
+﻿using AutoMapper;
+using GymManagement.BLL.Services.Interfaces;
 using GymManagement.BLL.ViewModels.PlanViewModels;
 using GymManagement.DAL.Data.Models;
 using GymManagement.DAL.Repositories.Interfaces;
+using GymManagement.BLL.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,100 +16,79 @@ namespace GymManagement.BLL.Services.Classes
     {
 
         private readonly IUnitOfWork _unitOfWork;
-        public PlanService(IUnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+        public PlanService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<bool> EditPlanAsync(int id, EditedPlanViewModel editedPlanViewModel, CancellationToken ct)
+
+        public async Task<Result> EditPlanAsync(int id, EditedPlanViewModel editedPlanViewModel, CancellationToken ct)
         {
             var plan = await _unitOfWork.GetRepository<Plan>().GetByIdAsync(id, ct);
-            if(plan == null) return false;
-            if (await IsPlanInUseAsync(id, ct)) return false;
+            if (plan == null) return Result.Fail("Plan not found");
+            if (await IsPlanInUseAsync(id, ct)) return Result.Fail("Plan is in use");
 
             //plan.Name = editedPlanViewModel.Name;
-            plan.Description = editedPlanViewModel.Description;
-            plan.Duration = editedPlanViewModel.Duration;
-            plan.Price = editedPlanViewModel.Price;
-            plan.UpdatedAt = DateTime.UtcNow;
-
+            _mapper.Map(editedPlanViewModel, plan);
+            plan.UpdatedAt = DateTime.Now;
             _unitOfWork.GetRepository<Plan>().Update(plan);
-            return _unitOfWork.SaveChangesAsync(ct).Result > 0;
+            return (await _unitOfWork.SaveChangesAsync(ct)) > 0 ? Result.Ok() : Result.Fail("Failed to save changes");
         }
-        public async Task<EditedPlanViewModel?> GetEditedPlanByIdAsync(int id, CancellationToken ct)
+        public async Task<Result<EditedPlanViewModel?>> GetEditedPlanByIdAsync(int id, CancellationToken ct)
         {
             var plan = await _unitOfWork.GetRepository<Plan>().GetByIdAsync(id, ct);
-            if (plan == null) return null;
+            if (plan == null) return Result<EditedPlanViewModel?>.Fail("Plan not found");
 
             //BLL
-            if (await IsPlanInUseAsync(id, ct)) return null;
+            if (await IsPlanInUseAsync(id, ct)) return Result<EditedPlanViewModel?>.Fail("Plan is in use");
 
-            var editedPlanViewModel = new EditedPlanViewModel
-            {
-                Name = plan.Name,
-                Description = plan.Description,
-                Duration = plan.Duration,
-                Price = plan.Price
-            };
-            return editedPlanViewModel;
+            var editedPlanViewModel = _mapper.Map<EditedPlanViewModel>(plan);
+            return Result<EditedPlanViewModel?>.Ok(editedPlanViewModel);
         }
-        public async Task<IEnumerable<PlanViewModel>> GetAllPlansAsync(CancellationToken ct)
+        public async Task<Result<IEnumerable<PlanViewModel>>> GetAllPlansAsync(CancellationToken ct)
         {
             var plans = await _unitOfWork.GetRepository<Plan>().GetAllAsync(ct: ct);
-            var PlanViewModels = plans.Select(p => new PlanViewModel
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Duration = p.Duration,
-                Price = p.Price,
-                IsActive = p.IsActive
-            }).ToList();
-            return PlanViewModels;
+            var PlanViewModels = _mapper.Map<IEnumerable<PlanViewModel>>(plans);
+            return Result<IEnumerable<PlanViewModel>>.Ok(PlanViewModels);
 
         }
-        public async Task<PlanViewModel> GetPlanByIdAsync(int id, CancellationToken ct)
+        public async Task<Result<PlanViewModel>> GetPlanByIdAsync(int id, CancellationToken ct)
         {
-            if (id == null) return null;
+            if (id == null) return Result<PlanViewModel>.Fail("Invalid ID");
 
             var plan = await _unitOfWork.GetRepository<Plan>().GetByIdAsync(id, ct);
 
-            if (plan == null) return null;
+            if (plan == null) return Result<PlanViewModel>.Fail("Plan not found");
 
-            var planViewModel = new PlanViewModel
-            {
-                Name = plan.Name,
-                Description = plan.Description,
-                Duration = plan.Duration,
-                Price = plan.Price,
-                IsActive = plan.IsActive
-            };
-            return planViewModel;
+            var planViewModel = _mapper.Map<PlanViewModel>(plan);
+            return Result<PlanViewModel>.Ok(planViewModel);
 
         }
 
 
-        public async Task<bool> ToggleActivateAsync(int id, CancellationToken ct)
+        public async Task<Result> ToggleActivateAsync(int id, CancellationToken ct)
         {
-            
-            var plan = await  _unitOfWork.GetRepository<Plan>().GetByIdAsync(id, ct);
-            if (plan == null) return false;
 
-            if (await IsPlanInUseAsync(id, ct)) return false;
+            var plan = await _unitOfWork.GetRepository<Plan>().GetByIdAsync(id, ct);
+            if (plan == null) return Result.Fail("Plan not found");
+
+            if (await IsPlanInUseAsync(id, ct)) return Result.Fail("Plan is in use");
 
             plan.IsActive = !plan.IsActive;
             plan.UpdatedAt = DateTime.UtcNow;
 
             _unitOfWork.GetRepository<Plan>().Update(plan);
 
-            return _unitOfWork.SaveChangesAsync(ct).Result > 0;
+            return (await _unitOfWork.SaveChangesAsync(ct)) > 0 ? Result.Ok() : Result.Fail("Failed to save changes");
 
         }
         // Healper method to check if a plan is in use by any active membership
-        public async Task<bool> IsPlanInUseAsync(int planId, CancellationToken ct)
+        private async Task<bool> IsPlanInUseAsync(int planId, CancellationToken ct)
         {
-            return  await _unitOfWork.GetRepository<MemberShip>().AnyAsync(m => m.PlanId == planId && m.EndDate > DateTime.UtcNow, ct);
-            
+            return await _unitOfWork.GetRepository<MemberShip>().AnyAsync(m => m.PlanId == planId && m.EndDate > DateTime.UtcNow, ct);
+
         }
     }
 }

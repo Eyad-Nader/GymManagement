@@ -35,9 +35,6 @@ namespace GymManagement.BLL.Services.Classes
                 CompletedSessions = CompletedSessions,
                 UpcomingSessions = UpcomingSessions,
                 OngoingSessions = OngoingSessions
-
-
-
             });
 
         }
