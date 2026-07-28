@@ -57,7 +57,7 @@ namespace GymManagement.DAL.Repositories.Classes
 
         public Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default)
         {
-            return _set.AsNoTracking().FirstOrDefaultAsync(predicate, ct);
+            return _set.FirstOrDefaultAsync(predicate, ct);
         }
 
         public async Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate, CancellationToken ct = default)

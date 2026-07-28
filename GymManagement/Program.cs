@@ -31,6 +31,7 @@ namespace GymManagement
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
             builder.Services.AddScoped<IMemberShipService, MemberShipService>();
 
+            builder.Services.AddScoped<IBookingsRepository, BookingsRepository>();
             builder.Services.AddScoped<IMemberShipsRepository, MemberShipsRepository>();
             builder.Services.AddScoped<ISessionRepository, SessionRepository>();
             builder.Services.AddScoped(typeof(IGenaricRepository<>), typeof(GenaricRepository<>));

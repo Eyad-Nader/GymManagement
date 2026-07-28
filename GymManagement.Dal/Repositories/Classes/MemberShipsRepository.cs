@@ -26,8 +26,12 @@ namespace GymManagement.DAL.Repositories.Classes
                 .Include(m => m.Plan)
                 .ToListAsync(ct);
         }
+
+
+        // كان الاحسن تاخد predicate
         public async Task<MemberShip?> GetActiveMembershipWithPlanAsync(int memberId,CancellationToken ct = default)
         {
+
             return await _dbContext.MemberShips
                 .AsNoTracking()
                 .Include(m => m.Plan)

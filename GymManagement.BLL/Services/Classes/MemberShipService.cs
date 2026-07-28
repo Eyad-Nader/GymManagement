@@ -23,13 +23,12 @@ namespace GymManagement.BLL.Services.Classes
         }
         public async Task<Result> CancelMemberShipAsync(int id, CancellationToken ct = default)
         {
-            var MemberShip = await _unitOfWork.MemberShipsRepository.GetByIdAsync(id, ct);
-            if (MemberShip is null) return Result.Fail("MemberShip Not Found");
+            var ActiveMemberShip = await _unitOfWork.MemberShipsRepository.FirstOrDefaultAsync(m => m.MemberId == id && m.EndDate > DateTime.Now, ct);
 
-            if (!MemberShip.IsActive) return Result.Fail("Can't Cancel Expired Membership");
+            if (ActiveMemberShip is null) return Result.NotFound("No Active MemberShip");
 
-            MemberShip.EndDate = DateTime.Now;
-            _unitOfWork.GetRepository<MemberShip>().Update(MemberShip);
+            
+            _unitOfWork.MemberShipsRepository.Delete(ActiveMemberShip);
             if (await _unitOfWork.SaveChangesAsync(ct) <= 0) return Result.Fail("Failed to Cancel MemberShip");
             return Result.Ok();
         }
@@ -47,12 +46,13 @@ namespace GymManagement.BLL.Services.Classes
             var now = DateTime.Now;
 
             var exists = await _unitOfWork.MemberShipsRepository.AnyAsync(
-                ms => ms.MemberId == createMemberShip.MemberId &&
-                      ms.CreatedAt <= now &&
-                      ms.EndDate >= now
+                m => m.MemberId == createMemberShip.MemberId &&
+                      m.CreatedAt <= now &&
+                      m.EndDate >= now
             );
             if (exists) return Result.Fail("Member Already Have Active Membership");
 
+            //Don't need mapper Need to update end date
             var MemberShip = new MemberShip
             {
                 MemberId = createMemberShip.MemberId,
@@ -86,7 +86,6 @@ namespace GymManagement.BLL.Services.Classes
         public async Task<Result<IEnumerable<MemberShipViewModel>?>> GetAllMemberShipsAsync(CancellationToken ct = default)
         {
             var memberShips = await _unitOfWork.MemberShipsRepository.GetAllMemberShipsWithMemberAndPlanAsync(ct);
-            if (memberShips is null) return Result<IEnumerable<MemberShipViewModel>?>.Fail("No MemberShips Found");
             var memberShipViewModels = _mapper.Map<IEnumerable<MemberShipViewModel>>(memberShips);
             return Result<IEnumerable<MemberShipViewModel>?>.Ok(memberShipViewModels);
         }

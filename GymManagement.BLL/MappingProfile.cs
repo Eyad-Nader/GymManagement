@@ -125,9 +125,8 @@ namespace GymManagement.BLL
             CreateMap<MemberShip, MemberShipViewModel>()
             .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member.Name))
             .ForMember(dest => dest.PlanName, opt => opt.MapFrom(src => src.Plan.Name))
-            .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.CreatedAt))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate));
+            .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.MemberId))
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.CreatedAt));
             
         }
     }
