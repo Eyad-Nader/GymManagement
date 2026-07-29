@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace GymManagement.DAL.Repositories.Classes
 {
-    public class BookingsRepository : IBookingsRepository
+    public class BookingsRepository :GenaricRepository<Booking> ,IBookingsRepository
     {
         private readonly GymDbContext _dbContext;
-        public BookingsRepository(GymDbContext dbContext) 
+        public BookingsRepository(GymDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
 
@@ -26,6 +26,13 @@ namespace GymManagement.DAL.Repositories.Classes
                           .Where(B=>B.SessionId == sessionId)
                           .ToListAsync(ct);
         }
+        public async Task<List<Member>> GetMembersNotBookedInSession(int sessionId,CancellationToken ct = default)
+        {
+            return await _dbContext.Members
+                .Where(m => !m.Bookings.Any(b => b.SessionId == sessionId))
+                .ToListAsync(ct);
+        }
+    
     }
     
 }

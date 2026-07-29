@@ -30,6 +30,7 @@ namespace GymManagement
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
             builder.Services.AddScoped<IMemberShipService, MemberShipService>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
 
             builder.Services.AddScoped<IBookingsRepository, BookingsRepository>();
             builder.Services.AddScoped<IMemberShipsRepository, MemberShipsRepository>();

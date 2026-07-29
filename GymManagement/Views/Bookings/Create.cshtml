@@ -1,0 +1,67 @@
+
+@model CreateMemberBooking
+
+@{
+    ViewData["Title"] = "Create Booking";
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="Alert" class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<h1>Create New Booking</h1>
+
+<hr />
+<div class="row">
+    <div class="d-flex justify-content-center align-items-center h-100">
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Booking Information</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <div class="mb-3">
+                            <input type="hidden" asp-for="SessionId" readonly />
+                            <label asp-for="Id" class="form-label">Member</label>
+                            <select asp-for="Id" asp-items="ViewBag.Members" class="form-select">
+                                <option value="">-- Select Member --</option>
+                            </select>
+                            <span asp-validation-for="Id" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Booking
+                            </button>
+                            <a asp-action="GetMembersForUpcomingSession" asp-route-SessionId="@Model.SessionId" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_AlertBoxScript.cshtml" />
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 for better dropdown experience
+            $('#Id').select2({
+                placeholder: "Select a member",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+}

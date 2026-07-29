@@ -1,4 +1,4 @@
-﻿using GymManagement.DAL.Data.DbContexts;
+using GymManagement.DAL.Data.DbContexts;
 using GymManagement.DAL.Data.Models;
 using GymManagement.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -15,15 +15,17 @@ namespace GymManagement.DAL.Repositories.Classes
         private readonly GymDbContext _context;
         private readonly Dictionary<string, object> _repositories = [];
 
-        public UnitOfWork(GymDbContext context, ISessionRepository sessionRepository, IMemberShipsRepository memberShipsRepository)
+        public UnitOfWork(GymDbContext context, ISessionRepository sessionRepository, IMemberShipsRepository memberShipsRepository, IBookingsRepository bookingsRepository)
         {
             _context = context;
             SessionRepository = sessionRepository;
             MemberShipsRepository = memberShipsRepository;
+            BookingsRepository = bookingsRepository;
         }
 
         public ISessionRepository SessionRepository { get; }
         public IMemberShipsRepository MemberShipsRepository { get; }
+        public IBookingsRepository BookingsRepository { get; }
 
         public IGenaricRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity, new()
         {
